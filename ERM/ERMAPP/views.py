@@ -7,11 +7,18 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 
 # Create your views here.
-prev=1000
+prev1=''
+prev=Employee.objects.all()
+serializer=Employeeserializer(prev,many=True)
+data=serializer.data[-1]['empid']
+for i in data:
+    if i in '0123456789':
+        prev1+=i
+prev1=int(prev1)
 def Empid():
-    global prev
-    new=prev+1
-    prev=new
+    global prev1
+    new=prev1+1
+    prev1=new
     return 'MT-'+str(new)
 @api_view(['POST','GET','PUT','DELETE'])
 def Employee_data(request):
