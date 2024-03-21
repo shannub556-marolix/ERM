@@ -1,25 +1,27 @@
 from django.shortcuts import render
-from.models import Employee
-from.serializer import Employeeserializer
+from.models import Employee,Attendance
+from.serializer import Employeeserializer,Attendanceserializer
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
+import datetime
 
-# Create your views here.
-prev1=''
-prev=Employee.objects.all()
-serializer=Employeeserializer(prev,many=True)
-data=serializer.data[-1]['empid']
-for i in data:
-    if i in '0123456789':
-        prev1+=i
-prev1=int(prev1)
+
 def Empid():
-    global prev1
-    new=prev1+1
-    prev1=new
-    return 'MT-'+str(new)
+    num=''
+    try:
+        last=Employee.objects.all()
+        serializer=Employeeserializer(last,many=True)
+        last_id=serializer.data[-1]['empid']
+    except:
+        last_id='MT-1000'
+    for i in last_id:
+        if i in '0123456789':
+            num+=i
+    num=int(num)+1
+    return 'MT-'+str(num)
+
 @api_view(['POST','GET','PUT','DELETE'])
 def Employee_data(request):
     if request.method=='POST':
@@ -50,3 +52,25 @@ def Employee_data(request):
         employee_details =Employee.objects.get(empid=request.data['empid'])
         employee_details.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST','GET','PUT','DELETE'])
+def Attendance_data(request):
+    if request.method=="POST":
+        current_date=datetime.datetime.now()
+        empid=request.data['empid']
+        empname=request.data['empname']
+        login_time=datetime.datetime.now()
+        try:
+            logout_time=datetime.datetime.now()
+            last_attend=Attendance.objects.filter(empid=empid).last()
+            serializer=Attendanceserializer(last_attend)
+            if serializer.data['logout_time']=='0':
+                Attendance.objects.filter(logout_time='0').update(logout_time=logout_time)
+                return Response({'msg':"logout succesfull"})
+        except:
+            pass
+        save_data=Attendance(current_date=current_date,empid=empid,empname=empname,login_time=login_time)
+        save_data.save()
+        return Response({'msg':"login","details":"serializer.data"})
+

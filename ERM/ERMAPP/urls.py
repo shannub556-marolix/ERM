@@ -6,4 +6,5 @@ from.import views
 urlpatterns = [
 
     path('employee',views.Employee_data),
+    path('attendance', views.Attendance_data),
 ]
