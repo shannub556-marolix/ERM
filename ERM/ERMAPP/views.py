@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from.models import Employee,Attendance
-from.serializer import Employeeserializer,Attendanceserializer
+from.models import Employee,Punchin,Late_Punchin
+from.serializer import Employeeserializer,Punchinserializer,Late_Punchinserializer
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework import status
@@ -57,20 +57,40 @@ def Employee_data(request):
 @api_view(['POST','GET','PUT','DELETE'])
 def Attendance_data(request):
     if request.method=="POST":
-        current_date=datetime.datetime.now()
+        current_date=datetime.date.today()
         empid=request.data['empid']
         empname=request.data['empname']
         login_time=datetime.datetime.now()
         try:
-            logout_time=datetime.datetime.now()
-            last_attend=Attendance.objects.filter(empid=empid).last()
-            serializer=Attendanceserializer(last_attend)
-            if serializer.data['logout_time']=='0':
-                Attendance.objects.filter(logout_time='0').update(logout_time=logout_time)
+            logout_time = datetime.datetime.now()
+            if Punchin.objects.filter(empid=empid,logout_time='0').exists():
+                logout_data=Punchin.objects.filter(empid=empid,logout_time='0')
+                serializer=Punchinserializer(logout_data,many=True)
+                t=datetime.date.today()
+                y=t.strftime('20%y-%m-%d')
+                if serializer.data[0]['current_date'] != y:
+                    late_login=serializer.data[0]['login_time']
+                    late_details=Late_Punchin(current_date=current_date,empid=empid,empname=empname,login_time=late_login,logout_time=login_time)
+                    late_details.save()
+                    Punchin.objects.filter(empid=empid, logout_time='0').delete()
+                    return Response({"msg" : "logout failed Contact hr"})
+                Punchin.objects.filter(empid=empid,logout_time='0').update(logout_time=logout_time)
                 return Response({'msg':"logout succesfull"})
         except:
             pass
-        save_data=Attendance(current_date=current_date,empid=empid,empname=empname,login_time=login_time)
+        save_data=Punchin(current_date=current_date,empid=empid,empname=empname,login_time=login_time)
         save_data.save()
         return Response({'msg':"login","details":"serializer.data"})
+
+
+@api_view(['POST','GET','PUT','DELETE'])
+def Attendance_list(request):
+    if request.method=='GET':
+        start_date='2024-03-20'
+        end_date='2024-03-23'
+        s=Punchin.objects.raw('select id,empid, empname from Punchin where current_date between "'+start_date+'" and "'+end_date+'"')
+        serializer=Punchinserializer(s,many=True)
+        return Response({'msg':serializer.data})
+
+
 

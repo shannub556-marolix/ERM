@@ -7,4 +7,5 @@ urlpatterns = [
 
     path('employee',views.Employee_data),
     path('attendance', views.Attendance_data),
+    path('list',views.Attendance_list),
 ]

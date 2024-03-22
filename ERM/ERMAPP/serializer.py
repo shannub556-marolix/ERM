@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from.models import Employee,Attendance
+from.models import Employee,Punchin,Late_Punchin
 
 
 class Employeeserializer(serializers.ModelSerializer):
@@ -7,7 +7,12 @@ class Employeeserializer(serializers.ModelSerializer):
         model=Employee
         fields='__all__'
 
-class Attendanceserializer(serializers.ModelSerializer):
+class Punchinserializer(serializers.ModelSerializer):
     class Meta:
-        model=Attendance
+        model=Punchin
+        fields='__all__'
+
+class Late_Punchinserializer(serializers.ModelSerializer):
+    class Meta:
+        model=Late_Punchin
         fields='__all__'
