@@ -7,7 +7,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 import datetime
 
-
 def Empid():
     num=''
     try:
@@ -86,11 +85,20 @@ def Attendance_data(request):
 @api_view(['POST','GET','PUT','DELETE'])
 def Attendance_list(request):
     if request.method=='GET':
-        start_date='2024-03-20'
-        end_date='2024-03-23'
-        s=Punchin.objects.raw('select id,empid, empname from Punchin where current_date between "'+start_date+'" and "'+end_date+'"')
+        start_date='2024-03-23'
+        end_date='2024-03-24'
+        s=Punchin.objects.all()
+        filtered_list={}
         serializer=Punchinserializer(s,many=True)
-        return Response({'msg':serializer.data})
+        for ch in serializer.data:
+            if ch['current_date']>=start_date  and ch['current_date']< end_date:
+                if ch['empid'] in filtered_list:
+                    empid=ch['empid']
+                    filtered_list[empid]['count']=(filtered_list[empid].get('count'))+1
+                else:
+                    ch['count']=1
+                    filtered_list[ch['empid']]=ch
+        return Response({'msg':filtered_list})
 
 
 

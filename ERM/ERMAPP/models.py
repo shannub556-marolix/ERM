@@ -14,6 +14,8 @@ class Punchin(models.Model):
     empname = models.CharField(max_length=100)
     login_time=models.CharField(max_length=100)
     logout_time=models.CharField(max_length=100,default="0")
+    class Meta:
+        db_table='Punchin'
 
 
 class Late_Punchin(models.Model):
@@ -22,5 +24,3 @@ class Late_Punchin(models.Model):
     empname = models.CharField(max_length=100)
     login_time=models.CharField(max_length=100)
     logout_time=models.CharField(max_length=100,default="0")
-    class Meta:
-        db_table='Punchin'
